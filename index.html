@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdHub - Modern Advertising Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+    <style>
+        :root {
+            /* Material Design 3 Color Palette */
+            --md-primary: #6750A4;
+            --md-on-primary: #FFFFFF;
+            --md-primary-container: #EADDFF;
+            --md-on-primary-container: #21005D;
+            
+            --md-secondary: #625B71;
+            --md-on-secondary: #FFFFFF;
+            --md-secondary-container: #E8DEF8;
+            --md-on-secondary-container: #1D192B;
+            
+            --md-tertiary: #7D5260;
+            --md-on-tertiary: #FFFFFF;
+            --md-tertiary-container: #FFD8E4;
+            --md-on-tertiary-container: #31111D;
+            
+            --md-error: #BA1A1A;
+            --md-on-error: #FFFFFF;
+            --md-error-container: #FFDAD6;
+            --md-on-error-container: #410002;
+            
+            --md-surface: #FEF7FF;
+            --md-on-surface: #1C1B1F;
+            --md-surface-variant: #E7E0EC;
+            --md-on-surface-variant: #49454F;
+            
+            --md-outline: #79747E;
+            --md-outline-variant: #CAC4D0;
+            --md-shadow: #000000;
+            --md-scrim: #000000;
+            
+            /* Surface containers */
+            --md-surface-container-lowest: #FFFFFF;
+            --md-surface-container-low: #F7F2FA;
+            --md-surface-container: #F3EDF7;
+            --md-surface-container-high: #ECE6F0;
+            --md-surface-container-highest: #E6E0E9;
+        }
+        
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 500;
+            background-color: var(--md-surface);
+            color: var(--md-on-surface);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .gradient-bg {
+            background: var(--md-primary);
+        }
+        
+        .surface-container {
+            background-color: var(--md-surface-container);
+        }
+        
+        .surface-container-high {
+            background-color: var(--md-surface-container-high);
+        }
+        
+        .surface-container-highest {
+            background-color: var(--md-surface-container-highest);
+        }
+        
+        /* Material Design Elevation Shadows */
+        .elevation-1 {
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+        }
+        
+        .elevation-2 {
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+        }
+        
+        .elevation-3 {
+            box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+        }
+        
+        .elevation-4 {
+            box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.3), 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
+        }
+        
+        .elevation-5 {
+            box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .loading-spinner {
+            border: 3px solid var(--md-outline-variant);
+            border-top: 3px solid var(--md-primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Material Design Button Styles */
+        .md-filled-button {
+            background-color: var(--md-primary);
+            color: var(--md-on-primary);
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0.1px;
+            padding: 10px 24px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .md-filled-button:hover {
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+        }
+        
+        .md-outlined-button {
+            background-color: transparent;
+            color: var(--md-primary);
+            border: 1px solid var(--md-outline);
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0.1px;
+            padding: 10px 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .md-outlined-button:hover {
+            background-color: rgba(103, 80, 164, 0.08);
+        }
+        
+        .md-text-button {
+            background-color: transparent;
+            color: var(--md-primary);
+            border: none;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0.1px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .md-text-button:hover {
+            background-color: rgba(103, 80, 164, 0.08);
+        }
+        
+        /* Material Design Text Field */
+        .md-text-field {
+            background-color: var(--md-surface-container-highest);
+            border: 1px solid var(--md-outline);
+            border-radius: 4px;
+            padding: 16px;
+            font-size: 16px;
+            line-height: 24px;
+            color: var(--md-on-surface);
+            transition: all 0.2s ease;
+        }
+        
+        .md-text-field:focus {
+            outline: none;
+            border-color: var(--md-primary);
+            border-width: 2px;
+            padding: 15px; /* Adjust padding to maintain size */
+        }
+        
+        .md-text-field::placeholder {
+            color: var(--md-on-surface-variant);
+        }
+        
+        /* Material Design Card */
+        .md-card {
+            background-color: var(--md-surface-container-low);
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .md-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background-color: var(--md-primary-container);
+            color: var(--md-on-primary-container);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.2s ease;
+            z-index: 40;
+        }
+        
+        .fab:hover {
+            transform: scale(1.05);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Social Action Buttons */
+        .social-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--md-surface-container-highest);
+            color: var(--md-on-surface-variant);
+        }
+        
+        .social-action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Share Button Animation */
+        .share-btn:active {
+            animation: shareAnimation 0.3s ease-in-out;
+        }
+        
+        @keyframes shareAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.8); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Share Modal */
+        .share-modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--md-surface-container-low);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 20px;
+            box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .share-modal.active {
+            transform: translateY(0);
+        }
+        
+        .share-platform {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .share-platform:hover {
+            background-color: var(--md-surface-container-highest);
+        }
+        
+        .platform-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        
+        .whatsapp { background-color: #25D366; color: white; }
+        .facebook { background-color: #1877F2; color: white; }
+        .twitter { background-color: #000000; color: white; }
+        .instagram { background-color: #E4405F; color: white; }
+        .linkedin { background-color: #0A66C2; color: white; }
+        .pinterest { background-color: #E60023; color: white; }
+        .copy { background-color: #6c757d; color: white; }
+        
+
+        
+        /* Hide scrollbar for all elements */
+        * {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
+        }
+        
+        *::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none; /* Chrome, Safari, Opera */
+        }
+        
+        /* Ensure body and html have no scrollbar */
+        html, body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col" style="background-color: var(--md-surface);">
+    <!-- Material Design App Bar -->
+    <header class="gradient-bg elevation-2" style="background-color: var(--md-surface-container); color: var(--md-on-surface);">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <span class="material-icons text-2xl" style="color: var(--md-primary);">hub</span>
+                    <h1 class="text-xl font-medium" style="color: var(--md-on-surface);">AdHub</h1>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span id="userStatus" class="text-sm" style="color: var(--md-on-surface-variant);"></span>
+                    <button id="adminToggle" class="hidden md-outlined-button">
+                        <span class="material-icons text-sm mr-1">admin_panel_settings</span>
+                        Admin
+                    </button>
+                    <button id="logoutBtn" class="hidden md-text-button" style="color: var(--md-error);">
+                        <span class="material-icons text-sm mr-1">logout</span>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 pb-16 flex-grow">
+        <!-- Login/Register Section -->
+        <div id="authSection" class="max-w-md mx-auto">
+            <div class="md-card elevation-3 p-8" style="background-color: var(--md-surface-container-low);">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background-color: var(--md-primary-container);">
+                        <span class="material-icons text-2xl" style="color: var(--md-on-primary-container);">hub</span>
+                    </div>
+                    <h2 class="text-2xl font-medium mb-2" style="color: var(--md-on-surface);">Welcome to AdHub</h2>
+                    <p class="text-sm" style="color: var(--md-on-surface-variant);">Create your account or sign in</p>
+                </div>
+                
+                <!-- Toggle Buttons -->
+                <div class="flex rounded-lg p-1 mb-8" style="background-color: var(--md-surface-container-highest);">
+                    <button id="showLoginBtn" class="flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all duration-200" style="color: var(--md-on-surface-variant);">
+                        Sign In
+                    </button>
+                    <button id="showRegisterBtn" class="flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all duration-200 elevation-1" style="background-color: var(--md-surface-container-low); color: var(--md-primary);">
+                        Create Account
+                    </button>
+                </div>
+                
+                <!-- Register Form -->
+                <div id="registerForm" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--md-on-surface);">Your Name</label>
+                        <input type="text" id="userName" 
+                               class="w-full md-text-field"
+                               placeholder="Enter your full name">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--md-on-surface);">Email Address</label>
+                        <input type="email" id="userEmail" 
+                               class="w-full md-text-field"
+                               placeholder="Enter your email">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--md-on-surface);">Password</label>
+                        <input type="password" id="userPassword" 
+                               class="w-full md-text-field"
+                               placeholder="Choose a strong password">
+                    </div>
+                    
+                    <button id="createAccountBtn" 
+                            class="w-full md-filled-button py-4 flex items-center justify-center space-x-2 mt-8">
+                        <span class="material-icons text-sm">person_add</span>
+                        <span>Create Account</span>
+                    </button>
+                </div>
+                
+                <!-- Login Form -->
+                <div id="loginForm" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--md-on-surface);">Email Address</label>
+                        <input type="email" id="loginEmail" 
+                               class="w-full md-text-field"
+                               placeholder="Enter your email">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--md-on-surface);">Password</label>
+                        <input type="password" id="loginPassword" 
+                               class="w-full md-text-field"
+                               placeholder="Enter your password">
+                    </div>
+                    
+                    <button id="signInBtn" 
+                            class="w-full md-filled-button py-4 flex items-center justify-center space-x-2 mt-8">
+                        <span class="material-icons text-sm">login</span>
+                        <span>Sign In</span>
+                    </button>
+                    
+                    <div class="text-center mt-4">
+                        <button id="forgotPasswordBtn" class="md-text-button">
+                            Forgot Password?
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="loadingIndicator" class="text-center py-8">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-sm mt-2" style="color: var(--md-on-surface-variant);">Checking login status...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="hidden max-w-2xl mx-auto mb-8">
+            <div class="md-card elevation-3 p-8" style="background-color: var(--md-surface-container-low);">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4" style="background-color: var(--md-secondary-container);">
+                        <span class="material-icons" style="color: var(--md-on-secondary-container);">admin_panel_settings</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-medium" style="color: var(--md-on-surface);">Admin Panel</h3>
+                        <p class="text-sm" style="color: var(--md-on-surface-variant);">Create and manage advertisements</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--md-on-surface);">Advertisement Title</label>
+                        <input type="text" id="adTitle" 
+                               class="w-full md-text-field"
+                               placeholder="Enter advertisement title">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--md-on-surface);">Image URL</label>
+                        <input type="url" id="adImageUrl" 
+                               class="w-full md-text-field"
+                               placeholder="https://i.ibb.co/example.jpg">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--md-on-surface);">Redirect Link</label>
+                        <input type="url" id="adRedirectUrl" 
+                               class="w-full md-text-field"
+                               placeholder="https://example.com">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--md-on-surface);">Description</label>
+                        <textarea id="adDescription" rows="3"
+                                  class="w-full md-text-field resize-none"
+                                  placeholder="Brief description of the advertisement"></textarea>
+                    </div>
+                    
+                    <button id="publishAdBtn" 
+                            class="w-full py-4 flex items-center justify-center space-x-2 mt-8" style="background-color: var(--md-tertiary); color: var(--md-on-tertiary); border-radius: 20px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s ease;">
+                        <span class="material-icons text-sm">publish</span>
+                        <span>Publish Advertisement</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ads Display Section -->
+        <div id="adsSection" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-2xl font-medium" style="color: var(--md-on-surface);">Latest Advertisements</h2>
+                    <p class="text-sm mt-1" style="color: var(--md-on-surface-variant);">Discover trending content</p>
+                </div>
+                <div class="flex items-center space-x-2 text-sm px-3 py-2 rounded-full" style="background-color: var(--md-secondary-container); color: var(--md-on-secondary-container);">
+                    <div class="w-2 h-2 rounded-full pulse-animation" style="background-color: var(--md-tertiary);"></div>
+                    <span>Live Updates</span>
+                </div>
+            </div>
+            
+            <div id="adsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Ads will be dynamically inserted here -->
+            </div>
+            
+            <div id="noAdsMessage" class="text-center py-16 hidden">
+                <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" style="background-color: var(--md-surface-container-highest);">
+                    <span class="material-icons text-4xl" style="color: var(--md-on-surface-variant);">campaign</span>
+            </div>
+                <h3 class="text-lg font-medium mb-2" style="color: var(--md-on-surface);">No advertisements yet</h3>
+                <p class="text-sm mb-4" style="color: var(--md-on-surface-variant);">Ads will appear here in real-time once posted by admins.</p>
+        </div>
+        </div>
+        
+        <!-- Floating Action Button -->
+        <button id="fabButton" class="fab hidden">
+            <span class="material-icons">add</span>
+        </button>
+    </div>
+
+    <!-- Ad Details Modal -->
+    <div id="adDetailsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.6);">
+        <div class="md-card elevation-5 max-w-2xl w-full max-h-[90vh] overflow-y-auto" style="background-color: var(--md-surface-container-low);">
+            <div class="p-6">
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center">
+                        <span class="material-icons mr-2" style="color: var(--md-primary);">info</span>
+                        <h2 class="text-xl font-medium" style="color: var(--md-on-surface);">Advertisement Details</h2>
+                    </div>
+                    <button id="closeModalBtn" class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200" style="color: var(--md-on-surface-variant);" onmouseover="this.style.backgroundColor='var(--md-surface-container-highest)'" onmouseout="this.style.backgroundColor='transparent'">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                
+                <!-- Modal Content -->
+                <div id="modalContent">
+                    <!-- Content will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="share-modal">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium" style="color: var(--md-on-surface);">Share Advertisement</h3>
+            <button id="closeShareBtn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="mb-4">
+            <div id="shareAdTitle" class="text-base font-medium mb-1" style="color: var(--md-on-surface);"></div>
+            <div id="shareAdDesc" class="text-sm" style="color: var(--md-on-surface-variant);"></div>
+        </div>
+        <div class="grid grid-cols-4 gap-6 mb-6">
+            <div class="share-platform" data-platform="whatsapp">
+                <div class="platform-icon whatsapp rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                </div>
+                <span class="text-xs">WhatsApp</span>
+            </div>
+            <div class="share-platform" data-platform="facebook">
+                <div class="platform-icon facebook rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                </div>
+                <span class="text-xs">Facebook</span>
+            </div>
+            <div class="share-platform" data-platform="twitter">
+                <div class="platform-icon twitter rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
+                    </svg>
+                </div>
+                <span class="text-xs">X</span>
+            </div>
+            <div class="share-platform" data-platform="instagram">
+                <div class="platform-icon instagram rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
+                    </svg>
+                </div>
+                <span class="text-xs">Instagram</span>
+            </div>
+            <div class="share-platform" data-platform="linkedin">
+                <div class="platform-icon linkedin rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                </div>
+                <span class="text-xs">LinkedIn</span>
+            </div>
+            <div class="share-platform" data-platform="pinterest">
+                <div class="platform-icon pinterest rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
+                    </svg>
+                </div>
+                <span class="text-xs">Pinterest</span>
+            </div>
+            <div class="share-platform" data-platform="copy">
+                <div class="platform-icon copy rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 9.5C7 8.67 7.67 8 8.5 8H12v1H8.5c-.28 0-.5.22-.5.5v7c0 .28.22.5.5.5h7c.28 0 .5-.22.5-.5V13h1v3.5c0 .83-.67 1.5-1.5 1.5h-7A1.5 1.5 0 017 16.5v-7z"/>
+                        <path d="M13 7.5C13 6.67 13.67 6 14.5 6h5c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5h-5A1.5 1.5 0 0113 12.5v-5zm1 0v5c0 .28.22.5.5.5h5c.28 0 .5-.22.5-.5v-5c0-.28-.22-.5-.5-.5h-5c-.28 0-.5.22-.5.5z"/>
+                    </svg>
+                </div>
+                <span class="text-xs">Copy Link</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-App Browser Modal -->
+    <div id="inAppBrowser" class="hidden fixed inset-0 bg-white z-60">
+        <!-- Browser Header -->
+        <div class="bg-gray-800 text-white p-3 md:p-4 flex flex-col md:flex-row md:items-center md:justify-between shadow-lg space-y-2 md:space-y-0">
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <button id="browserBackBtn" class="flex items-center space-x-1 md:space-x-2 bg-gray-700 hover:bg-gray-600 px-2 md:px-3 py-2 rounded-lg transition-all duration-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    <span class="text-xs md:text-sm">Back to AdHub</span>
+                </button>
+                <div id="browserUrl" class="bg-gray-700 px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-mono flex-1 md:max-w-md truncate">
+                    <!-- URL will be shown here -->
+                </div>
+            </div>
+            <div class="flex items-center space-x-1 md:space-x-2">
+                <button id="refreshBrowserBtn" class="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition-all duration-300" title="Refresh">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                </button>
+                <button id="openExternalBtn" class="bg-blue-600 hover:bg-blue-700 px-2 md:px-3 py-2 rounded-lg text-xs md:text-sm transition-all duration-300" title="Open in New Tab">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    <span class="hidden sm:inline">External</span>
+                </button>
+                <button id="closeBrowserBtn" class="bg-red-600 hover:bg-red-700 p-2 rounded-lg transition-all duration-300" title="Close">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Browser Content -->
+        <div class="h-full">
+            <div id="browserLoading" class="hidden absolute inset-0 bg-white flex items-center justify-center z-10">
+                <div class="text-center">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Loading website...</p>
+                </div>
+            </div>
+            <iframe id="browserFrame" 
+                    class="w-full h-full border-none" 
+                    style="height: calc(100vh - 100px);"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 left-0 right-0 py-2 z-10" style="background-color: var(--md-surface-container-highest); border-top: 1px solid var(--md-outline-variant);">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-sm" style="color: var(--md-on-surface-variant);">Developed by MH Softwares</p>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHGbSJ_eV4Jg8wT99sJiXc-2wRnDsP74s",
+            authDomain: "adhub-6fcba.firebaseapp.com",
+            databaseURL: "https://adhub-6fcba-default-rtdb.firebaseio.com",
+            projectId: "adhub-6fcba",
+            storageBucket: "adhub-6fcba.firebasestorage.app",
+            messagingSenderId: "25776333369",
+            appId: "1:25776333369:web:76f2a987bf465acb74a3e8"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Global Variables
+        let currentUser = null;
+        let isAdmin = false;
+
+        // DOM Elements
+        const authSection = document.getElementById('authSection');
+        const adminPanel = document.getElementById('adminPanel');
+        const adsSection = document.getElementById('adsSection');
+        const userStatus = document.getElementById('userStatus');
+        const adminToggle = document.getElementById('adminToggle');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const adsContainer = document.getElementById('adsContainer');
+        const noAdsMessage = document.getElementById('noAdsMessage');
+        const adDetailsModal = document.getElementById('adDetailsModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalContent = document.getElementById('modalContent');
+        const inAppBrowser = document.getElementById('inAppBrowser');
+        const browserFrame = document.getElementById('browserFrame');
+        const browserUrl = document.getElementById('browserUrl');
+        const browserBackBtn = document.getElementById('browserBackBtn');
+        const refreshBrowserBtn = document.getElementById('refreshBrowserBtn');
+        const openExternalBtn = document.getElementById('openExternalBtn');
+        const closeBrowserBtn = document.getElementById('closeBrowserBtn');
+        const browserLoading = document.getElementById('browserLoading');
+        const fabButton = document.getElementById('fabButton');
+        
+        // Auth form elements
+        const showLoginBtn = document.getElementById('showLoginBtn');
+        const showRegisterBtn = document.getElementById('showRegisterBtn');
+        const registerForm = document.getElementById('registerForm');
+        const loginForm = document.getElementById('loginForm');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        // Firebase Auth State Listener
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = {
+                    uid: user.uid,
+                    email: user.email,
+                    name: user.displayName || user.email.split('@')[0]
+                };
+                // Hide loading and show success message on successful login/reload
+                hideLoading();
+                checkUserRole();
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                hideLoading();
+                updateUI();
+            }
+        });
+
+        // Form Toggle Functions
+        showLoginBtn.addEventListener('click', function() {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            showLoginBtn.classList.add('elevation-1');
+            showLoginBtn.style.backgroundColor = 'var(--md-surface-container-low)';
+            showLoginBtn.style.color = 'var(--md-primary)';
+            showRegisterBtn.classList.remove('elevation-1');
+            showRegisterBtn.style.backgroundColor = 'transparent';
+            showRegisterBtn.style.color = 'var(--md-on-surface-variant)';
+        });
+
+        showRegisterBtn.addEventListener('click', function() {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            showRegisterBtn.classList.add('elevation-1');
+            showRegisterBtn.style.backgroundColor = 'var(--md-surface-container-low)';
+            showRegisterBtn.style.color = 'var(--md-primary)';
+            showLoginBtn.classList.remove('elevation-1');
+            showLoginBtn.style.backgroundColor = 'transparent';
+            showLoginBtn.style.color = 'var(--md-on-surface-variant)';
+        });
+
+        // Show loading state
+        function showLoading(message = 'Processing...') {
+            registerForm.classList.add('hidden');
+            loginForm.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+            loadingIndicator.querySelector('p').textContent = message;
+        }
+
+        // Hide loading state
+        function hideLoading() {
+            // Only hide loading if user is not authenticated
+            if (!currentUser) {
+                loadingIndicator.classList.add('hidden');
+                if (showRegisterBtn.classList.contains('bg-white')) {
+                    registerForm.classList.remove('hidden');
+                } else {
+                    loginForm.classList.remove('hidden');
+                }
+            } else {
+                // User is authenticated, hide all auth forms
+                loadingIndicator.classList.add('hidden');
+                registerForm.classList.add('hidden');
+                loginForm.classList.add('hidden');
+            }
+        }
+
+        // Check for existing user session
+        function checkUserSession() {
+            // Show loading while checking authentication state
+            const user = auth.currentUser;
+            if (!user) {
+                // Only show loading indicator initially if no user is detected immediately
+                setTimeout(() => {
+                    if (!currentUser) {
+                        hideLoading();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Create Account with Firebase Auth
+        document.getElementById('createAccountBtn').addEventListener('click', function() {
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const password = document.getElementById('userPassword').value.trim();
+            
+            if (!name || !email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long');
+                return;
+            }
+            
+            showLoading();
+            
+            // Create user with Firebase Auth
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // Update user profile with name
+                    return user.updateProfile({
+                        displayName: name
+                    }).then(() => {
+                        // Save additional user data to Realtime Database
+                        const userData = {
+                            uid: user.uid,
+                            name: name,
+                            email: email,
+                            role: 'user', // Default role, can be changed to 'admin' manually
+                            createdAt: Date.now()
+                        };
+                        
+                        return database.ref('users/' + user.uid).set(userData);
+                    });
+                })
+                .then(() => {
+                    showSuccess('Account created successfully! Welcome to AdHub!');
+                    clearForms();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    handleAuthError(error);
+                });
+        });
+
+        // Sign In
+        document.getElementById('signInBtn').addEventListener('click', function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            
+            if (!email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            showLoading();
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showSuccess('Welcome back!');
+                    clearForms();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    handleAuthError(error);
+                });
+        });
+
+        // Forgot Password
+        document.getElementById('forgotPasswordBtn').addEventListener('click', function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            
+            if (!email) {
+                showError('Please enter your email address first');
+                return;
+            }
+            
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    showSuccess('Password reset email sent! Check your inbox.');
+                })
+                .catch((error) => {
+                    handleAuthError(error);
+                });
+        });
+
+        // Handle Authentication Errors
+        function handleAuthError(error) {
+            let message = 'An error occurred. Please try again.';
+            
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    message = 'An account with this email already exists. Please sign in instead.';
+                    break;
+                case 'auth/invalid-email':
+                    message = 'Please enter a valid email address.';
+                    break;
+                case 'auth/operation-not-allowed':
+                    message = 'Account creation is currently disabled.';
+                    break;
+                case 'auth/weak-password':
+                    message = 'Password is too weak. Please choose a stronger password.';
+                    break;
+                case 'auth/user-disabled':
+                    message = 'This account has been disabled.';
+                    break;
+                case 'auth/user-not-found':
+                    message = 'No account found with this email address.';
+                    break;
+                case 'auth/wrong-password':
+                    message = 'Invalid password. Please try again.';
+                    break;
+                case 'auth/too-many-requests':
+                    message = 'Too many failed attempts. Please try again later.';
+                    break;
+            }
+            
+            showError(message);
+        }
+
+        // Check user role and update UI
+        function checkUserRole() {
+            if (!currentUser) return;
+            
+            // Listen for real-time role changes
+            database.ref('users/' + currentUser.uid).on('value', (snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    isAdmin = userData.role === 'admin';
+                    currentUser.name = userData.name;
+                    currentUser.role = userData.role;
+                    updateUI();
+                    loadAds();
+                    
+                    // Show notification when user becomes admin
+                    if (isAdmin && !currentUser.wasAdmin) {
+                        showSuccess('🎉 You now have admin privileges! You can create advertisements.');
+                        currentUser.wasAdmin = true;
+                    }
+                }
+            });
+        }
+
+        // Update UI based on user state
+        function updateUI() {
+            if (currentUser) {
+                authSection.classList.add('hidden');
+                adsSection.classList.remove('hidden');
+                userStatus.innerHTML = `Welcome, <span class="font-semibold">${currentUser.name}</span> ${isAdmin ? '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs ml-2">Admin</span>' : ''}`;
+                userStatus.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                
+                if (isAdmin) {
+                    adminToggle.classList.remove('hidden');
+                    fabButton.classList.remove('hidden');
+                    adminToggle.innerHTML = `
+                        <span class="material-icons text-sm mr-1">admin_panel_settings</span>
+                        Admin
+                    `;
+                } else {
+                    fabButton.classList.add('hidden');
+                }
+                
+                // Show welcome back message on page reload
+                if (sessionStorage.getItem('justReloaded') === 'true') {
+                    showSuccess(`Welcome back, ${currentUser.name}!`);
+                    sessionStorage.removeItem('justReloaded');
+                }
+            } else {
+                authSection.classList.remove('hidden');
+                adsSection.classList.add('hidden');
+                adminPanel.classList.add('hidden');
+                userStatus.classList.add('hidden');
+                adminToggle.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+                hideLoading();
+            }
+        }
+
+        // Toggle Admin Panel
+        adminToggle.addEventListener('click', function() {
+            if (isAdmin) {
+                adminPanel.classList.toggle('hidden');
+            }
+        });
+        
+        // FAB Button click
+        fabButton.addEventListener('click', function() {
+            if (isAdmin) {
+                adminPanel.classList.toggle('hidden');
+                // Scroll to admin panel if opening
+                if (!adminPanel.classList.contains('hidden')) {
+                    adminPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+
+        // Publish Advertisement
+        document.getElementById('publishAdBtn').addEventListener('click', function() {
+            if (!isAdmin) {
+                alert('Only admins can publish advertisements');
+                return;
+            }
+            
+            const title = document.getElementById('adTitle').value.trim();
+            const imageUrl = document.getElementById('adImageUrl').value.trim();
+            const redirectUrl = document.getElementById('adRedirectUrl').value.trim();
+            const description = document.getElementById('adDescription').value.trim();
+            
+            if (!title || !imageUrl || !redirectUrl) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            if (!isValidUrl(imageUrl) || !isValidUrl(redirectUrl)) {
+                alert('Please enter valid URLs');
+                return;
+            }
+            
+            const adData = {
+                id: generateAdId(),
+                title: title,
+                imageUrl: imageUrl,
+                redirectUrl: redirectUrl,
+                description: description,
+                publishedBy: currentUser.name,
+                publishedAt: Date.now()
+            };
+            
+            database.ref('ads/' + adData.id).set(adData)
+                .then(() => {
+                    showSuccess('Advertisement published successfully!');
+                    clearAdForm();
+                })
+                .catch((error) => {
+                    console.error('Error publishing ad:', error);
+                    alert('Error publishing advertisement. Please try again.');
+                });
+        });
+
+        // Load and display ads
+        function loadAds() {
+            database.ref('ads').on('value', (snapshot) => {
+                const ads = snapshot.val();
+                displayAds(ads);
+            });
+        }
+
+        // Display ads in the UI
+        function displayAds(ads) {
+            adsContainer.innerHTML = '';
+            
+            if (!ads || Object.keys(ads).length === 0) {
+                noAdsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noAdsMessage.classList.add('hidden');
+            
+            const adsArray = Object.values(ads).sort((a, b) => b.publishedAt - a.publishedAt);
+            
+            adsArray.forEach(ad => {
+                const adElement = createAdElement(ad);
+                adsContainer.appendChild(adElement);
+            });
+        }
+
+        // Create ad element
+        function createAdElement(ad) {
+            const adDiv = document.createElement('div');
+            adDiv.className = 'md-card elevation-2 cursor-pointer overflow-hidden';
+            adDiv.style.backgroundColor = 'var(--md-surface-container-low)';
+            
+            adDiv.innerHTML = `
+                <div class="relative">
+                    <img src="${ad.imageUrl}" alt="${ad.title}" 
+                         class="w-full h-72 object-cover"
+                         onerror="this.src='https://via.placeholder.com/400x200?text=Image+Not+Found'">
+                    <div class="absolute top-3 right-3 px-2 py-1 rounded text-xs font-medium" style="background-color: var(--md-tertiary-container); color: var(--md-on-tertiary-container);">
+                        <span class="material-icons text-xs mr-1">campaign</span>
+                        Ad
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-base font-medium mb-2 line-clamp-2" style="color: var(--md-on-surface);">${ad.title}</h3>
+                    ${ad.description ? `<p class="text-sm mb-3 line-clamp-2" style="color: var(--md-on-surface-variant);">${ad.description}</p>` : ''}
+                    
+                    <!-- Share Button -->
+                    <div class="flex justify-end items-center mb-3">
+                        <button class="social-action-btn share-btn" data-ad-id="${ad.id}" data-ad-title="${ad.title}" data-ad-image="${ad.imageUrl}">
+                            <span class="material-icons">share</span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-xs pt-2 border-t" style="border-color: var(--md-outline-variant); color: var(--md-on-surface-variant);">
+                        <div class="flex items-center">
+                            <span class="material-icons text-xs mr-1">person</span>
+                            <span>${ad.publishedBy}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="material-icons text-xs mr-1">schedule</span>
+                        <span>${formatDate(ad.publishedAt)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listener for the ad content (image, title, description)
+            adDiv.addEventListener('click', () => {
+                showAdDetails(ad);
+            });
+            
+            // Add event listener for share button
+            const shareBtn = adDiv.querySelector('.share-btn');
+            shareBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showShareModal(ad);
+            });
+            
+            return adDiv;
+        }
+
+        // Show Ad Details Modal
+        function showAdDetails(ad) {
+            modalContent.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Ad Image -->
+                    <div class="relative">
+                        <img src="${ad.imageUrl}" alt="${ad.title}" 
+                             class="w-full h-80 object-contain bg-gray-100 rounded-lg"
+                             onerror="this.src='https://via.placeholder.com/800x400?text=Image+Not+Found'">
+                        <div class="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                            Advertisement
+                        </div>
+                    </div>
+                    
+                    <!-- Ad Title -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">${ad.title}</h3>
+                    </div>
+                    
+                    <!-- Share Button -->
+                    <div class="flex justify-end items-center pb-4 border-b border-gray-200">
+                        <button id="modalShareBtn" class="social-action-btn share-btn" data-ad-id="${ad.id}" data-ad-title="${ad.title}" data-ad-image="${ad.imageUrl}">
+                            <span class="material-icons text-xl">share</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Action Buttons (Top) -->
+                    <div class="flex flex-col sm:flex-row gap-3 pb-4 border-b border-gray-200">
+                        <button onclick="visitSite('${ad.redirectUrl}')" 
+                                class="flex-1 gradient-bg text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                            <span>Visit Site</span>
+                        </button>
+                        <button onclick="closeAdDetails()" 
+                                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-300">
+                            Close
+                        </button>
+                    </div>
+                    
+                    <!-- Ad Description -->
+                    ${ad.description ? `
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-700 mb-2">Description</h4>
+                            <p class="text-gray-600 leading-relaxed">${ad.description}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Ad Info -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3">Advertisement Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="font-medium text-gray-600">Published by:</span>
+                                <span class="text-gray-800 ml-2">${ad.publishedBy}</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-600">Published on:</span>
+                                <span class="text-gray-800 ml-2">${formatDate(ad.publishedAt)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                        <button onclick="visitSite('${ad.redirectUrl}')" 
+                                class="flex-1 gradient-bg text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                            <span>Visit Site</span>
+                        </button>
+                        <button onclick="closeAdDetails()" 
+                                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-300">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            adDetailsModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            
+            // Add event listener for modal share button
+            document.getElementById('modalShareBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                showShareModal(ad);
+            });
+        }
+
+        // Close Ad Details Modal
+        function closeAdDetails() {
+            adDetailsModal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // Visit Site Function - Now opens in in-app browser
+        function visitSite(url) {
+            openInAppBrowser(url);
+        }
+
+        // Open In-App Browser
+        function openInAppBrowser(url) {
+            // Show loading
+            browserLoading.classList.remove('hidden');
+            
+            // Update URL display
+            browserUrl.textContent = url;
+            
+            // Set iframe source
+            browserFrame.src = url;
+            
+            // Store current URL for external open
+            inAppBrowser.dataset.currentUrl = url;
+            
+            // Show browser
+            inAppBrowser.classList.remove('hidden');
+            
+            // Close ad details modal if open
+            closeAdDetails();
+            
+            // Handle iframe load events
+            browserFrame.onload = function() {
+                browserLoading.classList.add('hidden');
+            };
+            
+            browserFrame.onerror = function() {
+                browserLoading.classList.add('hidden');
+                showError('Failed to load website. Some sites may not support embedding.');
+            };
+        }
+
+        // Close In-App Browser
+        function closeInAppBrowser() {
+            inAppBrowser.classList.add('hidden');
+            browserFrame.src = 'about:blank';
+            browserLoading.classList.add('hidden');
+        }
+
+        // Refresh Browser
+        function refreshBrowser() {
+            const currentUrl = inAppBrowser.dataset.currentUrl;
+            if (currentUrl) {
+                browserLoading.classList.remove('hidden');
+                browserFrame.src = currentUrl;
+            }
+        }
+
+        // Open in External Browser
+        function openExternal() {
+            const currentUrl = inAppBrowser.dataset.currentUrl;
+            if (currentUrl) {
+                window.open(currentUrl, '_blank');
+            }
+        }
+
+        // Modal Event Listeners
+        closeModalBtn.addEventListener('click', closeAdDetails);
+        
+        // Close modal when clicking outside
+        adDetailsModal.addEventListener('click', function(e) {
+            if (e.target === adDetailsModal) {
+                closeAdDetails();
+            }
+        });
+        
+        // In-App Browser Event Listeners
+        browserBackBtn.addEventListener('click', closeInAppBrowser);
+        closeBrowserBtn.addEventListener('click', closeInAppBrowser);
+        refreshBrowserBtn.addEventListener('click', refreshBrowser);
+        openExternalBtn.addEventListener('click', openExternal);
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (!inAppBrowser.classList.contains('hidden')) {
+                    closeInAppBrowser();
+                } else if (!adDetailsModal.classList.contains('hidden')) {
+                    closeAdDetails();
+                }
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', function() {
+            auth.signOut()
+                .then(() => {
+                    showSuccess('You have been signed out successfully');
+                    clearForms();
+                })
+                .catch((error) => {
+                    console.error('Error signing out:', error);
+                    showError('Error signing out. Please try again.');
+                });
+        });
+
+        // Utility Functions
+        function generateAdId() {
+            return 'ad_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString();
+        }
+
+        function showSuccess(message) {
+            showNotification(message, 'success');
+        }
+
+        function showError(message) {
+            showNotification(message, 'error');
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'var(--md-tertiary-container)' : 'var(--md-error-container)';
+            const textColor = type === 'success' ? 'var(--md-on-tertiary-container)' : 'var(--md-on-error-container)';
+            const icon = type === 'success' ? 'check_circle' : 'error';
+            
+            notification.className = 'fixed top-4 right-4 elevation-3 px-4 py-3 rounded-lg z-50 max-w-sm';
+            notification.style.backgroundColor = bgColor;
+            notification.style.color = textColor;
+            
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <span class="material-icons text-sm">${icon}</span>
+                    <span class="flex-1 text-sm">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200" onmouseover="this.style.backgroundColor='rgba(0,0,0,0.1)'" onmouseout="this.style.backgroundColor='transparent'">
+                        <span class="material-icons text-sm">close</span>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function clearAdForm() {
+            document.getElementById('adTitle').value = '';
+            document.getElementById('adImageUrl').value = '';
+            document.getElementById('adRedirectUrl').value = '';
+            document.getElementById('adDescription').value = '';
+        }
+
+        function clearForms() {
+            document.getElementById('userName').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            clearAdForm();
+        }
+
+
+        
+        // Show Share Modal
+        function showShareModal(ad) {
+            if (!currentUser) {
+                showError('Please sign in to share advertisements');
+                return;
+            }
+            
+            // Set share modal content
+            document.getElementById('shareAdTitle').textContent = ad.title;
+            document.getElementById('shareAdDesc').textContent = ad.description || 'Click a platform to share this advertisement';
+            
+            // Show the modal
+            const shareModal = document.getElementById('shareModal');
+            shareModal.classList.add('active');
+            
+            // Generate share URL
+            const shareUrl = window.location.origin + window.location.pathname + '?ad=' + ad.id;
+            
+            // Set up share platforms
+            const sharePlatforms = document.querySelectorAll('.share-platform');
+            sharePlatforms.forEach(platform => {
+                const platformElement = platform.cloneNode(true); // Clone to avoid multiple event listeners
+                platform.replaceWith(platformElement);
+                
+                platformElement.addEventListener('click', () => {
+                    const platformName = platformElement.getAttribute('data-platform');
+                    shareToSocialMedia(platformName, ad.title, shareUrl, ad.imageUrl, ad.description);
+                });
+            });
+            
+            // Close share modal
+            document.getElementById('closeShareBtn').addEventListener('click', () => {
+                shareModal.classList.remove('active');
+            });
+        }
+        
+        // Share to Social Media
+        function shareToSocialMedia(platform, title, url, imageUrl, description = '') {
+            let shareUrl;
+            // Create a formatted share text with title and description
+            const shareText = description 
+                ? `${title} - ${description}`
+                : title;
+            
+            switch (platform) {
+                case 'whatsapp':
+                    shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n\n' + url)}`;
+                    break;
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(shareText)}`;
+                    break;
+                case 'twitter':
+                    // Twitter has character limits, so we need to be careful with the length
+                    const twitterText = description 
+                        ? `${title}: ${description.substring(0, 100)}${description.length > 100 ? '...' : ''}`
+                        : title;
+                    shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}&url=${encodeURIComponent(url)}`;
+                    break;
+                case 'linkedin':
+                    // LinkedIn doesn't support description in the share URL, but we can add it to the URL parameters
+                    shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(description || '')}`;
+                    break;
+                case 'pinterest':
+                    shareUrl = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(imageUrl)}&description=${encodeURIComponent(shareText)}`;
+                    break;
+                case 'copy':
+                    // Copy a formatted version with title, description and URL
+                    const copyText = `${title}${description ? '\n' + description : ''}\n\n${url}`;
+                    navigator.clipboard.writeText(copyText)
+                        .then(() => {
+                            showSuccess('Link copied to clipboard');
+                            document.getElementById('shareModal').classList.remove('active');
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy link: ', err);
+                            showError('Failed to copy link');
+                        });
+                    return;
+                default:
+                    showError('Sharing to this platform is not supported');
+                    return;
+            }
+            
+            // Open share URL in new window
+            window.open(shareUrl, '_blank', 'width=600,height=400');
+            
+            // Close share modal
+            document.getElementById('shareModal').classList.remove('active');
+            
+            // Record share activity
+            if (currentUser) {
+                const shareActivity = {
+                    userId: currentUser.uid,
+                    userName: currentUser.name,
+                    adId: document.querySelector('.share-btn').getAttribute('data-ad-id'),
+                    platform: platform,
+                    timestamp: Date.now()
+                };
+                
+                database.ref('shares').push(shareActivity)
+                    .catch(error => console.error('Error recording share activity:', error));
+            }
+        }
+        
+
+
+        // Initialize app
+        window.addEventListener('load', function() {
+            // Set flag for page reload detection
+            sessionStorage.setItem('justReloaded', 'true');
+        });
+        
+        // Initialize persistence settings for Firebase Auth
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .then(() => {
+                checkUserSession();
+                updateUI();
+            })
+            .catch((error) => {
+                console.error('Error setting persistence:', error);
+                checkUserSession();
+                updateUI();
+            });
+    </script>
+</body>
+</html>
